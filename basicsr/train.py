@@ -10,7 +10,7 @@ from basicsr.data.data_sampler import EnlargedSampler
 from basicsr.data.prefetch_dataloader import CPUPrefetcher, CUDAPrefetcher
 from basicsr.models import build_model
 from basicsr.utils import (AvgTimer, MessageLogger, check_resume, get_env_info, get_root_logger, get_time_str,
-                           init_tb_logger, init_wandb_logger, make_exp_dirs, mkdir_and_rename, scandir)
+                           init_tb_logger, init_wandb_logger, make_exp_dirs, mkdir_and_rename, scandir, tensor2img, imwrite)
 from basicsr.utils.options import copy_opt_file, dict2str, parse_options
 
 
@@ -184,6 +184,22 @@ def train_pipeline(root_path):
             if current_iter % opt['logger']['save_checkpoint_freq'] == 0:
                 logger.info('Saving models and training states.')
                 model.save(epoch, current_iter)
+
+            save_current_visuals = True
+            if save_current_visuals and current_iter <= 10:
+                visuals = model.get_current_visuals()
+
+                for i in range(len(train_data)):
+                    img_name = osp.splitext(osp.basename(train_data['gt_path'][i]))[0]
+                    degrad_sample_root = osp.join(opt['path']['experiments_root'], 'degrad_sample')
+                    lq_img_save_path = osp.join(degrad_sample_root, 'lq', f'{img_name}.png')
+                    gt_img_save_path = osp.join(degrad_sample_root, 'gt', f'{img_name}.png')
+
+                    lq_img = tensor2img([visuals['lq'][i]])
+                    gt_img = tensor2img([visuals['gt'][i]])
+
+                    imwrite(lq_img, lq_img_save_path)
+                    imwrite(gt_img, gt_img_save_path)
 
             # validation
             if opt.get('val') is not None and (current_iter % opt['val']['val_freq'] == 0):
