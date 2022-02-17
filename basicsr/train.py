@@ -186,7 +186,7 @@ def train_pipeline(root_path):
                 model.save(epoch, current_iter)
 
             save_current_visuals = True
-            if save_current_visuals and current_iter <= 10:
+            if save_current_visuals and current_iter <= 20:
                 visuals = model.get_current_visuals()
 
                 for i in range(len(train_data)):

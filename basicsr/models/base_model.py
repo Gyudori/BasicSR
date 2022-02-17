@@ -226,7 +226,7 @@ class BaseModel():
         retry = 3
         while retry > 0:
             try:
-                torch.save(save_dict, save_path)
+                torch.save(save_dict, save_path, _use_new_zipfile_serialization=False)
             except Exception as e:
                 logger = get_root_logger()
                 logger.warning(f'Save model error: {e}, remaining retry times: {retry - 1}')
